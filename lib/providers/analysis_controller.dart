@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,10 +12,12 @@ import 'package:openlabel/utils/image_compression_service.dart';
 
 final analysisControllerProvider =
     AsyncNotifierProvider<AnalysisController, ProductAnalysisResult?>(
-  AnalysisController.new,
-);
+      AnalysisController.new,
+    );
 
-final translatedResultProvider = FutureProvider<ProductAnalysisResult?>((ref) async {
+final translatedResultProvider = FutureProvider<ProductAnalysisResult?>((
+  ref,
+) async {
   final baseAsync = ref.watch(analysisControllerProvider);
   final result = baseAsync.valueOrNull;
   if (result == null) return null;
@@ -37,21 +38,29 @@ final translatedResultProvider = FutureProvider<ProductAnalysisResult?>((ref) as
   }
 
   final tOverall = await t(result.overallVerdict);
-  final tProduct = result.productName != null ? await t(result.productName!) : null;
-  final tLegal = result.legalDraftText != null ? await t(result.legalDraftText!) : null;
-  
-  final tFlags = await Future.wait(result.flags.map((f) async {
-    return f.copyWith(
-      title: await t(f.title),
-      rationale: await t(f.rationale),
-      evidence: await t(f.evidence),
-    );
-  }));
+  final tProduct = result.productName != null
+      ? await t(result.productName!)
+      : null;
+  final tLegal = result.legalDraftText != null
+      ? await t(result.legalDraftText!)
+      : null;
+
+  final tFlags = await Future.wait(
+    result.flags.map((f) async {
+      return f.copyWith(
+        title: await t(f.title),
+        rationale: await t(f.rationale),
+        evidence: await t(f.evidence),
+      );
+    }),
+  );
 
   final tAlts = result.healthierAlternatives != null
-      ? await Future.wait(result.healthierAlternatives!.map((a) async {
-          return await t(a);
-        }))
+      ? await Future.wait(
+          result.healthierAlternatives!.map((a) async {
+            return await t(a);
+          }),
+        )
       : null;
 
   return result.copyWith(
@@ -85,15 +94,23 @@ class AnalysisController extends AsyncNotifier<ProductAnalysisResult?> {
       if (permission == LocationPermission.deniedForever) return null;
 
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+        ),
       );
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
         final parts = <String>[];
-        if (place.administrativeArea != null && place.administrativeArea!.isNotEmpty) parts.add(place.administrativeArea!);
-        if (place.country != null && place.country!.isNotEmpty) parts.add(place.country!);
+        if (place.administrativeArea != null &&
+            place.administrativeArea!.isNotEmpty)
+          parts.add(place.administrativeArea!);
+        if (place.country != null && place.country!.isNotEmpty)
+          parts.add(place.country!);
         return parts.isEmpty ? null : parts.join(', ');
       }
     } catch (e) {
@@ -117,13 +134,14 @@ class AnalysisController extends AsyncNotifier<ProductAnalysisResult?> {
       };
       if (userLocation != null) data['user_location'] = userLocation;
 
-      final response = await _dio.post(
-        '/api/v1/scan/dual-image',
-        data: data,
-      );
+      final response = await _dio.post('/api/v1/scan/dual-image', data: data);
 
-      final responseData = response.data is String ? jsonDecode(response.data) : response.data;
-      final result = ProductAnalysisResult.fromJson(responseData as Map<String, dynamic>);
+      final responseData = response.data is String
+          ? jsonDecode(response.data)
+          : response.data;
+      final result = ProductAnalysisResult.fromJson(
+        responseData as Map<String, dynamic>,
+      );
       state = AsyncData(result);
     } on DioException catch (e, st) {
       state = AsyncError(e, st);
@@ -136,18 +154,17 @@ class AnalysisController extends AsyncNotifier<ProductAnalysisResult?> {
     state = const AsyncLoading();
     try {
       final userLocation = await _getUserRegion();
-      final data = <String, dynamic>{
-        'url': url,
-      };
+      final data = <String, dynamic>{'url': url};
       if (userLocation != null) data['user_location'] = userLocation;
 
-      final response = await _dio.post(
-        '/api/v1/scan/link',
-        data: data,
-      );
+      final response = await _dio.post('/api/v1/scan/link', data: data);
 
-      final responseData = response.data is String ? jsonDecode(response.data) : response.data;
-      final result = ProductAnalysisResult.fromJson(responseData as Map<String, dynamic>);
+      final responseData = response.data is String
+          ? jsonDecode(response.data)
+          : response.data;
+      final result = ProductAnalysisResult.fromJson(
+        responseData as Map<String, dynamic>,
+      );
       state = AsyncData(result);
     } on DioException catch (e, st) {
       state = AsyncError(e, st);

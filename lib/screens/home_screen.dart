@@ -310,13 +310,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-                child: _CartCopCard(
-                  controller: _urlController,
-                  focusNode: _urlFocus,
-                  focused: focused,
-                  onSubmit: _onUrlSubmit,
-                  title: TranslationService.t('cart_cop', lang),
-                  subtitle: TranslationService.t('cart_cop_subtitle', lang),
+                child: Column(
+                  children: [
+                    _CartCopCard(
+                      controller: _urlController,
+                      focusNode: _urlFocus,
+                      focused: focused,
+                      onSubmit: _onUrlSubmit,
+                      title: TranslationService.t('cart_cop', lang),
+                      subtitle: TranslationService.t('cart_cop_subtitle', lang),
+                    ),
+                    const SizedBox(height: 12),
+                    _SourceOptionTile(
+                      onTap: () => context.push('/dart-lab'),
+                      icon: Icons.science_outlined,
+                      title: 'DIY Testing Lab',
+                      subtitle: 'FSSAI adulteration home tests',
+                    ),
+                  ],
                 ),
               ),
             ),

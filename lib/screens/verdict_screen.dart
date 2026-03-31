@@ -22,8 +22,9 @@ class VerdictScreen extends ConsumerStatefulWidget {
 }
 
 class _VerdictScreenState extends ConsumerState<VerdictScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _pulseController;
+  late final TabController _tabController;
   final ScreenshotController _heroScreenshotController = ScreenshotController();
 
   @override
@@ -33,10 +34,12 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen>
       vsync: this,
       duration: const Duration(milliseconds: 2200),
     )..repeat(reverse: true);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _pulseController.dispose();
     ref.read(ttsServiceProvider).stop(ref);
     super.dispose();
@@ -272,6 +275,78 @@ Stop falling for mislabeling. Scan your labels with OpenLabel. #TechJustice #Ope
       resolvedColor = OpenLabelTheme.neonGreen;
     }
 
+    // --- Flag Filtering ---
+    const claimsKeywords = [
+      'claim',
+      'organic',
+      'natural',
+      'marketing',
+      'misleading',
+      'label',
+      'certification',
+      'cert',
+      'packaging',
+      'deceptive',
+      'fraud',
+    ];
+    const healthKeywords = [
+      'sugar',
+      'sodium',
+      'fat',
+      'calorie',
+      'upf',
+      'processed',
+      'preservative',
+      'additive',
+      'trans',
+      'cholesterol',
+      'fiber',
+      'nutrient',
+      'health',
+      'intake',
+      'diet',
+    ];
+    const allergenKeywords = [
+      'allergen',
+      'allergy',
+      'gluten',
+      'lactose',
+      'nut',
+      'soy',
+      'dairy',
+      'peanut',
+      'shellfish',
+      'egg',
+      'wheat',
+      'contamination',
+      'sensitive',
+    ];
+
+    bool _matches(FlagItem f, List<String> keywords) {
+      final text = '${f.code} ${f.title}'.toLowerCase();
+      return keywords.any((k) => text.contains(k));
+    }
+
+    final claimsFlags = result.flags
+        .where((f) => _matches(f, claimsKeywords))
+        .toList();
+    final healthFlags = result.flags
+        .where((f) => _matches(f, healthKeywords))
+        .toList();
+    final allergenFlags = result.flags
+        .where((f) => _matches(f, allergenKeywords))
+        .toList();
+
+    // Put uncategorised flags into claims as fallback
+    final categorised = <FlagItem>{
+      ...claimsFlags,
+      ...healthFlags,
+      ...allergenFlags,
+    };
+    for (final f in result.flags) {
+      if (!categorised.contains(f)) claimsFlags.add(f);
+    }
+
     return Scaffold(
       backgroundColor: OpenLabelTheme.background,
       body: Center(
@@ -280,66 +355,105 @@ Stop falling for mislabeling. Scan your labels with OpenLabel. #TechJustice #Ope
           child: Stack(
             children: [
               Positioned.fill(
-                child: Column(
-                  children: [
-                    Screenshot(
-                      controller: _heroScreenshotController,
-                      child: _VerdictHero(
-                        result: result,
-                        themeColor: resolvedColor,
-                        pulse: _pulseController,
-                        trustLabel: TranslationService.t('trust_score', lang),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView(
-                        padding: EdgeInsets.fromLTRB(
-                          20,
-                          8,
-                          20,
-                          100 + bottomInset,
-                        ),
-                        children: [
-                          _VerdictHeadlineCard(
-                            result: result,
-                            themeColor: resolvedColor,
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            'Flags',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 12),
-                          ...result.flags.map(
-                            (f) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _GlassFlagCard(flag: f),
-                            ),
-                          ),
-                          if (result.healthierAlternatives != null &&
-                              result.healthierAlternatives!.isNotEmpty) ...[
-                            const SizedBox(height: 24),
-                            Text(
-                              'Healthier Alternatives',
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                            const SizedBox(height: 12),
-                            ...result.healthierAlternatives!.map(
-                              (altString) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _AlternativeCard(
-                                  alt: altString,
-                                  themeColor: resolvedColor,
-                                ),
+                child: NestedScrollView(
+                  headerSliverBuilder: (context, innerBoxIsScrolled) {
+                    return [
+                      SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            // --- Static Hero ---
+                            Screenshot(
+                              controller: _heroScreenshotController,
+                              child: _VerdictHero(
+                                result: result,
+                                themeColor: resolvedColor,
+                                pulse: _pulseController,
+                                trustLabel: TranslationService.t('trust_score', lang),
                               ),
                             ),
+                            // --- Headline + TTS ---
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: _VerdictHeadlineCard(
+                                result: result,
+                                themeColor: resolvedColor,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                           ],
-                        ],
+                        ),
                       ),
+                      // --- Sticky TabBar ---
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _SliverTabBarDelegate(
+                          TabBar(
+                            controller: _tabController,
+                            indicatorColor: resolvedColor,
+                            indicatorWeight: 3,
+                            indicatorSize: TabBarIndicatorSize.label,
+                            labelColor: Colors.white,
+                            unselectedLabelColor: OpenLabelTheme.bodyGrey.withValues(
+                              alpha: 0.5,
+                            ),
+                            dividerColor: Colors.transparent,
+                            labelStyle: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.6,
+                                ),
+                            tabs: const [
+                              Tab(
+                                icon: Icon(Icons.campaign_outlined, size: 20),
+                                text: 'Claims',
+                              ),
+                              Tab(
+                                icon: Icon(Icons.medical_services_outlined, size: 20),
+                                text: 'Health',
+                              ),
+                              Tab(
+                                icon: Icon(Icons.warning_amber_rounded, size: 20),
+                                text: 'Allergens',
+                              ),
+                              Tab(
+                                icon: Icon(Icons.swap_horiz_rounded, size: 20),
+                                text: 'Swaps',
+                              ),
+                            ],
+                          ),
+                          backgroundColor: OpenLabelTheme.background,
+                        ),
+                      ),
+                    ];
+                  },
+                  // --- TabBarView ---
+                  body: SafeArea(
+                    top: false,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _ClaimsTab(
+                          flags: claimsFlags,
+                          themeColor: resolvedColor,
+                        ),
+                        _HealthTab(
+                          flags: healthFlags,
+                          themeColor: resolvedColor,
+                        ),
+                        _AllergensTab(
+                          flags: allergenFlags,
+                          themeColor: resolvedColor,
+                        ),
+                        _AlternativesTab(
+                          alternatives: result.healthierAlternatives ?? [],
+                          themeColor: resolvedColor,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
+              // --- Legal Draft FAB ---
               if (result.legalDraftAvailable)
                 Positioned(
                   left: 20,
@@ -355,6 +469,7 @@ Stop falling for mislabeling. Scan your labels with OpenLabel. #TechJustice #Ope
                     label: TranslationService.t('draft_complaint', lang),
                   ),
                 ),
+              // --- Nav Buttons ---
               Positioned(
                 top: MediaQuery.paddingOf(context).top + 6,
                 left: 8,
@@ -513,87 +628,6 @@ class _TrustPill extends StatelessWidget {
         style: Theme.of(
           context,
         ).textTheme.labelLarge?.copyWith(color: fg, letterSpacing: 1.2),
-      ),
-    );
-  }
-}
-
-class _GlassFlagCard extends StatelessWidget {
-  const _GlassFlagCard({required this.flag});
-
-  final FlagItem flag;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      flag.title,
-                      style: Theme.of(context).textTheme.titleMedium,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(999),
-                        color: OpenLabelTheme.surface,
-                        border: Border.all(color: OpenLabelTheme.border),
-                      ),
-                      child: Text(
-                        flag.severity.toUpperCase(),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: OpenLabelTheme.bodyGrey,
-                          letterSpacing: 0.8,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                flag.rationale,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              if (flag.evidence.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Evidence: ${flag.evidence}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: OpenLabelTheme.bodyGrey,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -790,46 +824,6 @@ class _InvalidTargetCard extends StatelessWidget {
   }
 }
 
-class _AlternativeCard extends StatelessWidget {
-  const _AlternativeCard({required this.alt, required this.themeColor});
-
-  final String alt;
-  final Color themeColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: OpenLabelTheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: themeColor.withValues(alpha: 0.15)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 12, top: 2),
-            child: Icon(
-              Icons.psychology_alt_rounded,
-              size: 22,
-              color: OpenLabelTheme.bodyGrey,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              alt,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: Colors.white, height: 1.4),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class SpeedometerWidget extends StatelessWidget {
   const SpeedometerWidget({
     super.key,
@@ -934,5 +928,394 @@ class _SpeedometerPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SpeedometerPainter oldDelegate) {
     return oldDelegate.percent != percent || oldDelegate.glowColor != glowColor;
+  }
+}
+
+class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverTabBarDelegate(this._tabBar, {required this.backgroundColor});
+
+  final TabBar _tabBar;
+  final Color backgroundColor;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      color: backgroundColor,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
+    return oldDelegate._tabBar != _tabBar ||
+        oldDelegate.backgroundColor != backgroundColor;
+  }
+}
+
+// ============================================================
+// TAB CONTENT WIDGETS
+// ============================================================
+
+class _ClaimsTab extends StatelessWidget {
+  const _ClaimsTab({required this.flags, required this.themeColor});
+  final List<FlagItem> flags;
+  final Color themeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    if (flags.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.verified_rounded,
+              size: 64,
+              color: OpenLabelTheme.neonGreen.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No misleading claims detected.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: OpenLabelTheme.bodyGrey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+      itemCount: flags.length,
+      itemBuilder: (context, i) {
+        final f = flags[i];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _TabFlagCard(
+            flag: f,
+            accentColor: OpenLabelTheme.warningYellow,
+            icon: Icons.campaign_rounded,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _HealthTab extends StatelessWidget {
+  const _HealthTab({required this.flags, required this.themeColor});
+  final List<FlagItem> flags;
+  final Color themeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+      itemCount: flags.length + 1,
+      itemBuilder: (context, i) {
+        if (i == 0) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: OpenLabelTheme.electricRed.withValues(alpha: 0.08),
+              border: Border.all(
+                color: OpenLabelTheme.electricRed.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: OpenLabelTheme.electricRed.withValues(alpha: 0.7),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Evaluated against FSSAI & WHO daily intake guidelines.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: OpenLabelTheme.electricRed.withValues(alpha: 0.85),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        final f = flags[i - 1];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _TabFlagCard(
+            flag: f,
+            accentColor: f.severity.toLowerCase() == 'high'
+                ? OpenLabelTheme.electricRed
+                : OpenLabelTheme.warningYellow,
+            icon: Icons.medical_services_rounded,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AllergensTab extends StatelessWidget {
+  const _AllergensTab({required this.flags, required this.themeColor});
+  final List<FlagItem> flags;
+  final Color themeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    if (flags.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: OpenLabelTheme.neonGreen.withValues(alpha: 0.12),
+                ),
+                child: const Icon(
+                  Icons.check_circle_outline_rounded,
+                  size: 72,
+                  color: OpenLabelTheme.neonGreen,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'All Clear!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: OpenLabelTheme.neonGreen,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'No declared allergens or cross-contamination risks detected for your profile.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: OpenLabelTheme.bodyGrey,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+      itemCount: flags.length,
+      itemBuilder: (context, i) {
+        final f = flags[i];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _TabFlagCard(
+            flag: f,
+            accentColor: OpenLabelTheme.electricRed,
+            icon: Icons.warning_amber_rounded,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AlternativesTab extends StatelessWidget {
+  const _AlternativesTab({
+    required this.alternatives,
+    required this.themeColor,
+  });
+  final List<String> alternatives;
+  final Color themeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    if (alternatives.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.swap_horiz_rounded,
+              size: 64,
+              color: OpenLabelTheme.bodyGrey.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No healthier swaps suggested.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: OpenLabelTheme.bodyGrey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+      itemCount: alternatives.length,
+      itemBuilder: (context, i) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: themeColor.withValues(alpha: 0.15)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: themeColor.withValues(alpha: 0.15),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${i + 1}',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: themeColor,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        alternatives[i],
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Colors.white,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Reusable flag card for tab views with accent color and leading icon.
+class _TabFlagCard extends StatelessWidget {
+  const _TabFlagCard({
+    required this.flag,
+    required this.accentColor,
+    required this.icon,
+  });
+  final FlagItem flag;
+  final Color accentColor;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: accentColor.withValues(alpha: 0.15)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, color: accentColor, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      flag.title,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(color: Colors.white),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: accentColor.withValues(alpha: 0.12),
+                      border: Border.all(
+                        color: accentColor.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      flag.severity.toUpperCase(),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: accentColor,
+                        letterSpacing: 0.8,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                flag.rationale,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: OpenLabelTheme.bodyGrey,
+                ),
+              ),
+              if (flag.evidence.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Evidence: ${flag.evidence}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: OpenLabelTheme.bodyGrey.withValues(alpha: 0.7),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

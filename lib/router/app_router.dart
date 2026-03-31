@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openlabel/screens/dart_lab_screen.dart';
 import 'package:openlabel/screens/home_screen.dart';
 import 'package:openlabel/screens/loading_screen.dart';
 import 'package:openlabel/screens/profile_screen.dart';
@@ -32,6 +33,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         name: 'profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/dart-lab',
+        name: 'dart_lab',
+        builder: (context, state) => const DartLabScreen(),
       ),
     ],
   );
