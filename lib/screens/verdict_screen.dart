@@ -45,19 +45,21 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen>
   Future<void> _onSharePressed(ProductAnalysisResult result) async {
     HapticFeedback.lightImpact();
 
-    final productName = (result.productName != null && result.productName!.isNotEmpty) 
-        ? result.productName! 
+    final productName =
+        (result.productName != null && result.productName!.isNotEmpty)
+        ? result.productName!
         : 'this product';
     final trustLevel = result.trustLevel;
     final overallVerdict = result.overallVerdict;
 
-    final shareText = '''🚨 OpenLabel Alert! 🚨
+    final shareText =
+        '''🚨 OpenLabel Alert! 🚨
 
 I just scanned $productName and it scored a $trustLevel Trust Level.
 
 Verdict: $overallVerdict
 
-Stop falling for food fraud. Scan your labels with OpenLabel. #TechJustice #OpenLabel''';
+Stop falling for mislabeling. Scan your labels with OpenLabel. #TechJustice #OpenLabel''';
 
     await Share.share(shareText, subject: 'OpenLabel Verdict for $productName');
   }
@@ -137,14 +139,13 @@ Stop falling for food fraud. Scan your labels with OpenLabel. #TechJustice #Open
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         gradient: const LinearGradient(
-                          colors: [
-                            OpenLabelTheme.neonGreen,
-                            Color(0xFF00C853),
-                          ],
+                          colors: [OpenLabelTheme.neonGreen, Color(0xFF00C853)],
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: OpenLabelTheme.neonGreen.withValues(alpha: 0.35),
+                            color: OpenLabelTheme.neonGreen.withValues(
+                              alpha: 0.35,
+                            ),
                             blurRadius: 24,
                             offset: const Offset(0, 10),
                           ),
@@ -171,7 +172,8 @@ Stop falling for food fraud. Scan your labels with OpenLabel. #TechJustice #Open
                             child: Center(
                               child: Text(
                                 'Copy to clipboard',
-                                style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                                style: Theme.of(ctx).textTheme.titleSmall
+                                    ?.copyWith(
                                       color: const Color(0xFF04140A),
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -208,7 +210,9 @@ Stop falling for food fraud. Scan your labels with OpenLabel. #TechJustice #Open
               const SizedBox(height: 16),
               Text(
                 'Translating verdict...',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: OpenLabelTheme.bodyGrey),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: OpenLabelTheme.bodyGrey,
+                ),
               ),
             ],
           ),
@@ -274,88 +278,106 @@ Stop falling for food fraud. Scan your labels with OpenLabel. #TechJustice #Open
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
           child: Stack(
-        children: [
-          Positioned.fill(
-            child: Column(
-              children: [
-                Screenshot(
-                  controller: _heroScreenshotController,
-                  child: _VerdictHero(
-                    result: result,
-                    themeColor: resolvedColor,
-                    pulse: _pulseController,
-                    trustLabel: TranslationService.t('trust_score', lang),
-                  ),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.fromLTRB(20, 8, 20, 100 + bottomInset),
-                    children: [
-                      _VerdictHeadlineCard(result: result, themeColor: resolvedColor),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Flags',
-                        style: Theme.of(context).textTheme.titleLarge,
+            children: [
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    Screenshot(
+                      controller: _heroScreenshotController,
+                      child: _VerdictHero(
+                        result: result,
+                        themeColor: resolvedColor,
+                        pulse: _pulseController,
+                        trustLabel: TranslationService.t('trust_score', lang),
                       ),
-                      const SizedBox(height: 12),
-                      ...result.flags.map((f) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _GlassFlagCard(flag: f),
-                          )),
-                      if (result.healthierAlternatives != null && result.healthierAlternatives!.isNotEmpty) ...[
-                        const SizedBox(height: 24),
-                        Text(
-                          'Healthier Alternatives',
-                          style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(
+                          20,
+                          8,
+                          20,
+                          100 + bottomInset,
                         ),
-                        const SizedBox(height: 12),
-                        ...result.healthierAlternatives!.map((altString) => Padding(
+                        children: [
+                          _VerdictHeadlineCard(
+                            result: result,
+                            themeColor: resolvedColor,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Flags',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 12),
+                          ...result.flags.map(
+                            (f) => Padding(
                               padding: const EdgeInsets.only(bottom: 12),
-                              child: _AlternativeCard(alt: altString, themeColor: resolvedColor),
-                            )),
-                      ],
-                    ],
+                              child: _GlassFlagCard(flag: f),
+                            ),
+                          ),
+                          if (result.healthierAlternatives != null &&
+                              result.healthierAlternatives!.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            Text(
+                              'Healthier Alternatives',
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 12),
+                            ...result.healthierAlternatives!.map(
+                              (altString) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _AlternativeCard(
+                                  alt: altString,
+                                  themeColor: resolvedColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (result.legalDraftAvailable)
+                Positioned(
+                  left: 20,
+                  right: 20,
+                  bottom: 16 + bottomInset,
+                  child: _TechJusticeButton(
+                    themeColor: resolvedColor,
+                    onPressed: () {
+                      final text = result.legalDraftText;
+                      if (text == null || text.isEmpty) return;
+                      _showLegalSheet(text);
+                    },
+                    label: TranslationService.t('draft_complaint', lang),
                   ),
                 ),
-              ],
-            ),
-          ),
-          if (result.legalDraftAvailable)
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: 16 + bottomInset,
-              child: _TechJusticeButton(
-                themeColor: resolvedColor,
-                onPressed: () {
-                  final text = result.legalDraftText;
-                  if (text == null || text.isEmpty) return;
-                  _showLegalSheet(text);
-                },
-                label: TranslationService.t('draft_complaint', lang),
+              Positioned(
+                top: MediaQuery.paddingOf(context).top + 6,
+                left: 8,
+                child: IconButton(
+                  onPressed: () => context.go('/home'),
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  color: Colors.white,
+                ),
               ),
-            ),
-          Positioned(
-            top: MediaQuery.paddingOf(context).top + 6,
-            left: 8,
-            child: IconButton(
-              onPressed: () => context.go('/home'),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              color: Colors.white,
-            ),
+              Positioned(
+                top: MediaQuery.paddingOf(context).top + 6,
+                right: 8,
+                child: IconButton(
+                  onPressed: () => _onSharePressed(result),
+                  icon: const Icon(Icons.share_outlined),
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            top: MediaQuery.paddingOf(context).top + 6,
-            right: 8,
-            child: IconButton(
-              onPressed: () => _onSharePressed(result),
-              icon: const Icon(Icons.share_outlined),
-              color: Colors.white,
-            ),
-          ),
-        ],
+        ),
       ),
-    )));
+    );
   }
 }
 
@@ -375,7 +397,7 @@ class _VerdictHero extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final h = MediaQuery.sizeOf(context).height * 0.35;
-    
+
     final speedScore = result.trustScore ?? 0.0;
 
     return SizedBox(
@@ -433,12 +455,17 @@ class _VerdictHero extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Center(
                       child: SpeedometerWidget(
-                        score: speedScore, 
+                        score: speedScore,
                         themeColor: themeColor,
                       ),
                     ),
                   ),
-                  Center(child: _TrustPill(score: result.trustLevel, label: trustLabel)),
+                  Center(
+                    child: _TrustPill(
+                      score: result.trustLevel,
+                      label: trustLabel,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -460,21 +487,18 @@ class _TrustPill extends StatelessWidget {
     final s = score.toUpperCase();
     final (Color fg, Color bg) = switch (s) {
       'RED' => (
-          Colors.white,
-          OpenLabelTheme.electricRed.withValues(alpha: 0.35),
-        ),
+        Colors.white,
+        OpenLabelTheme.electricRed.withValues(alpha: 0.35),
+      ),
       'YELLOW' => (
-          OpenLabelTheme.warningYellow,
-          OpenLabelTheme.warningYellow.withValues(alpha: 0.15),
-        ),
+        OpenLabelTheme.warningYellow,
+        OpenLabelTheme.warningYellow.withValues(alpha: 0.15),
+      ),
       'GREEN' => (
-          OpenLabelTheme.neonGreen,
-          OpenLabelTheme.neonGreen.withValues(alpha: 0.12),
-        ),
-      _ => (
-          OpenLabelTheme.bodyGrey,
-          OpenLabelTheme.surface,
-        ),
+        OpenLabelTheme.neonGreen,
+        OpenLabelTheme.neonGreen.withValues(alpha: 0.12),
+      ),
+      _ => (OpenLabelTheme.bodyGrey, OpenLabelTheme.surface),
     };
 
     return Container(
@@ -486,10 +510,9 @@ class _TrustPill extends StatelessWidget {
       ),
       child: Text(
         '$label: $s',
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: fg,
-              letterSpacing: 1.2,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.labelLarge?.copyWith(color: fg, letterSpacing: 1.2),
       ),
     );
   }
@@ -530,7 +553,10 @@ class _GlassFlagCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Flexible(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
                         color: OpenLabelTheme.surface,
@@ -539,9 +565,9 @@ class _GlassFlagCard extends StatelessWidget {
                       child: Text(
                         flag.severity.toUpperCase(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: OpenLabelTheme.bodyGrey,
-                              letterSpacing: 0.8,
-                            ),
+                          color: OpenLabelTheme.bodyGrey,
+                          letterSpacing: 0.8,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.right,
@@ -560,9 +586,9 @@ class _GlassFlagCard extends StatelessWidget {
                 Text(
                   'Evidence: ${flag.evidence}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: OpenLabelTheme.bodyGrey,
-                        fontStyle: FontStyle.italic,
-                      ),
+                    color: OpenLabelTheme.bodyGrey,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ],
             ],
@@ -590,10 +616,7 @@ class _TechJusticeButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
-          colors: [
-            themeColor,
-            themeColor.withValues(alpha: 0.7),
-          ],
+          colors: [themeColor, themeColor.withValues(alpha: 0.7)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -623,9 +646,9 @@ class _TechJusticeButton extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
@@ -669,10 +692,10 @@ class _VerdictHeadlineCard extends ConsumerWidget {
             child: Text(
               result.overallVerdict,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    height: 1.4,
-                  ),
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+              ),
             ),
           ),
           Positioned(
@@ -684,7 +707,9 @@ class _VerdictHeadlineCard extends ConsumerWidget {
                 if (isPlaying) {
                   ref.read(ttsServiceProvider).stop(ref);
                 } else {
-                  ref.read(ttsServiceProvider).speakVerdict(result.overallVerdict, ref);
+                  ref
+                      .read(ttsServiceProvider)
+                      .speakVerdict(result.overallVerdict, ref);
                 }
               },
               icon: Icon(
@@ -692,7 +717,7 @@ class _VerdictHeadlineCard extends ConsumerWidget {
                 color: isPlaying ? OpenLabelTheme.warningYellow : themeColor,
               ),
               style: IconButton.styleFrom(
-                backgroundColor: isPlaying 
+                backgroundColor: isPlaying
                     ? OpenLabelTheme.warningYellow.withValues(alpha: 0.15)
                     : themeColor.withValues(alpha: 0.15),
               ),
@@ -706,9 +731,9 @@ class _VerdictHeadlineCard extends ConsumerWidget {
 
 class _InvalidTargetCard extends StatelessWidget {
   final ProductAnalysisResult result;
-  
+
   const _InvalidTargetCard({required this.result});
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -716,13 +741,15 @@ class _InvalidTargetCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: OpenLabelTheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: OpenLabelTheme.bodyGrey.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: OpenLabelTheme.bodyGrey.withValues(alpha: 0.3),
+        ),
         boxShadow: [
           BoxShadow(
             color: OpenLabelTheme.electricRed.withValues(alpha: 0.05),
             blurRadius: 30,
             spreadRadius: 5,
-          )
+          ),
         ],
       ),
       child: Column(
@@ -734,17 +761,27 @@ class _InvalidTargetCard extends StatelessWidget {
               shape: BoxShape.circle,
               color: OpenLabelTheme.electricRed.withValues(alpha: 0.15),
             ),
-            child: const Icon(Icons.do_not_disturb_alt_rounded, size: 64, color: OpenLabelTheme.electricRed),
+            child: const Icon(
+              Icons.do_not_disturb_alt_rounded,
+              size: 64,
+              color: OpenLabelTheme.electricRed,
+            ),
           ),
           const SizedBox(height: 24),
           Text(
-            'Not a Food Product', 
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+            'Not a Food Product',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
-            result.overallVerdict, 
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: OpenLabelTheme.bodyGrey, height: 1.5), 
+            result.overallVerdict,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: OpenLabelTheme.bodyGrey,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -773,15 +810,18 @@ class _AlternativeCard extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.only(right: 12, top: 2),
-            child: Icon(Icons.psychology_alt_rounded, size: 22, color: OpenLabelTheme.bodyGrey),
+            child: Icon(
+              Icons.psychology_alt_rounded,
+              size: 22,
+              color: OpenLabelTheme.bodyGrey,
+            ),
           ),
           Expanded(
             child: Text(
               alt,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    height: 1.4,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: Colors.white, height: 1.4),
             ),
           ),
         ],
@@ -791,7 +831,11 @@ class _AlternativeCard extends StatelessWidget {
 }
 
 class SpeedometerWidget extends StatelessWidget {
-  const SpeedometerWidget({super.key, required this.score, required this.themeColor});
+  const SpeedometerWidget({
+    super.key,
+    required this.score,
+    required this.themeColor,
+  });
 
   final double score; // 0 to 100
   final Color themeColor;
@@ -816,10 +860,10 @@ class SpeedometerWidget extends StatelessWidget {
                 child: Text(
                   value.toInt().toString(),
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        height: 1.0,
-                      ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    height: 1.0,
+                  ),
                 ),
               ),
             ),
@@ -849,8 +893,8 @@ class _SpeedometerPainter extends CustomPainter {
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
-      3.14159, 
-      3.14159, 
+      3.14159,
+      3.14159,
       false,
       bgPaint,
     );
@@ -862,7 +906,7 @@ class _SpeedometerPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final sweepAngle = 3.14159 * percent.clamp(0.0, 1.0);
-    
+
     final glowPaint = Paint()
       ..color = glowColor.withValues(alpha: 0.6)
       ..strokeWidth = 18
