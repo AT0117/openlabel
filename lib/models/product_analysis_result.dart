@@ -31,6 +31,7 @@ abstract class ProductAnalysisResult with _$ProductAnalysisResult {
     @JsonKey(name: 'healthier_alternatives') List<String>? healthierAlternatives,
     @JsonKey(name: 'allergy_risks') List<String>? allergyRisks,
     @JsonKey(name: 'upf_score') double? upfScore,
+    @JsonKey(name: 'is_non_edible') @Default(false) bool isNonEdible,
   }) = _ProductAnalysisResult;
 
   factory ProductAnalysisResult.fromJson(Map<String, dynamic> json) =>

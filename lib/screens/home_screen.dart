@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,71 +64,77 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (!mounted) return;
     HapticFeedback.lightImpact();
 
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) {
-        final bottom = MediaQuery.paddingOf(ctx).bottom;
-        return Material(
-          color: OpenLabelTheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottom),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Container(
-                    width: 44,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(999),
+    ImageSource? source;
+
+    if (kIsWeb) {
+      source = ImageSource.gallery;
+    } else {
+      source = await showModalBottomSheet<ImageSource>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (ctx) {
+          final bottom = MediaQuery.paddingOf(ctx).bottom;
+          return Material(
+            color: OpenLabelTheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottom),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
                   ),
-                ),
-                Text(
-                  'Add label photos',
-                  style: Theme.of(ctx).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Choose camera or gallery. You’ll pick front, then back.',
-                  style: Theme.of(ctx).textTheme.bodySmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                _SourceOptionTile(
-                  icon: Icons.photo_camera_rounded,
-                  title: 'Camera',
-                  subtitle: 'Capture two photos in a row',
-                  onTap: () => Navigator.pop(ctx, ImageSource.camera),
-                ),
-                const SizedBox(height: 10),
-                _SourceOptionTile(
-                  icon: Icons.photo_library_rounded,
-                  title: 'Gallery',
-                  subtitle: 'Upload existing front & back images',
-                  onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: OpenLabelTheme.bodyGrey.withValues(alpha: 0.85),
+                  Text(
+                    'Add label photos',
+                    style: Theme.of(ctx).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Choose camera or gallery. You’ll pick front, then back.',
+                    style: Theme.of(ctx).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  _SourceOptionTile(
+                    icon: Icons.photo_camera_rounded,
+                    title: 'Camera',
+                    subtitle: 'Capture two photos in a row',
+                    onTap: () => Navigator.pop(ctx, ImageSource.camera),
+                  ),
+                  const SizedBox(height: 10),
+                  _SourceOptionTile(
+                    icon: Icons.photo_library_rounded,
+                    title: 'Gallery',
+                    subtitle: 'Upload existing front & back images',
+                    onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: OpenLabelTheme.bodyGrey.withValues(alpha: 0.85),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
 
     if (!mounted || source == null) return;
 
@@ -144,10 +150,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
     if (!mounted || back == null) return;
 
-    ref.read(analysisControllerProvider.notifier).analyzeImages(
-          File(front.path),
-          File(back.path),
-        );
+    ref.read(analysisControllerProvider.notifier).analyzeImages(front, back);
     if (!mounted) return;
     context.push('/loading');
   }
@@ -169,7 +172,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return Scaffold(
       backgroundColor: OpenLabelTheme.background,
       body: SafeArea(
-        child: CustomScrollView(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
@@ -317,7 +323,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

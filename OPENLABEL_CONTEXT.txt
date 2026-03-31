@@ -1,6 +1,6 @@
 ================================================================================
 OPENLABEL — PROJECT CONTEXT (for AI / handoff)
-Last updated: 2026-03-30
+Last updated: 2026-03-31
 ================================================================================
 
 PURPOSE OF THIS FILE
@@ -12,159 +12,71 @@ chat or model to continue work without re-explaining the project.
 PRODUCT
 -------
 Name: OpenLabel
-Type: Flutter mobile app (hackathon: 24h “OpenLabel” build)
-
-Elevator pitch:
-OpenLabel is a Consumer OSINT and Tech-Justice platform. Users either:
-  (1) Scan physical food labels (front + back photos), or
-  (2) Paste e-commerce product URLs (“Cart-Cop” for digital listings).
-
-The app surfaces hidden sugars, questionable organic/cert claims, allergen
-issues, and FSSAI-related concerns. When appropriate, it can draft a legal
-consumer complaint (India-oriented scaffold; FSSAI mentioned in UI copy).
-
-Current implementation: full UI + routing + integrated Live API via Dio & Supabase Auth.
+Type: Responsive Flutter app (Mobile, Web/Desktop layouts)
+Elevator pitch: OSINT and Tech-Justice platform detecting hidden food anomalies and generating legal drafts.
 
 TECH STACK
 ----------
-- Flutter (Dart SDK ^3.11.1 in pubspec)
-- flutter_riverpod — state; AnalysisController is AsyncNotifierProvider
+- Flutter (Dart SDK ^3.11.1)
+- flutter_riverpod — state; AsyncNotifierProvider
 - go_router — declarative routes
-- freezed + json_serializable — FlagItem, ProductAnalysisResult
-- dio — actively used for backend API client
-- supabase_flutter — used for JWT extraction to authorize API requests
-- flutter_image_compress — applied to encode local capture buffers for backend payload requirements
-- google_fonts — Inter for UI; Merriweather for legal draft modal body
-- image_picker — two camera captures for label scan (front then back)
-
-CODEGEN
--------
-From project root:
-  flutter pub get
-  dart run build_runner build --delete-conflicting-outputs
-
-Generates:
-  lib/models/product_analysis_result.freezed.dart
-  lib/models/product_analysis_result.g.dart
+- freezed + json_serializable — Data mapping
+- dio — Live API client via Supabase Auth
+- flutter_image_compress — image sizing (Mobile) + Base64 (Web)
+- flutter_tts — Text-To-Speech integrations
+- share_plus — Verdict exports
+- image_picker — Cross-platform image selection
 
 ROUTES (go_router)
 ------------------
 Initial location: /home
-
-  /home     — HomeScreen: bento layout, scan card, Cart-Cop URL field
-  /loading  — LoadingScreen: waits for AsyncNotifier analysis; on success → /verdict
-  /verdict  — VerdictScreen: trust hero, flags, optional legal CTA + bottom sheet
-
-Router is created in lib/router/app_router.dart as goRouterProvider (Provider<GoRouter>).
-main.dart wraps the app in ProviderScope and MaterialApp.router with ref.watch(goRouterProvider).
+  /home     — HomeScreen: Bento layout, scan card, Cart-Cop. (Web selects gallery natively avoiding bottom sheets)
+  /loading  — LoadingScreen: Waiting state
+  /verdict  — VerdictScreen: Hero Speedometer, Trust pill, TTS Playback, Flags, and FSSAI draft.
 
 STATE & DATA FLOW
 -----------------
-Provider: analysisControllerProvider
-  Type: AsyncNotifierProvider<AnalysisController, ProductAnalysisResult?>
-
 AnalysisController (lib/providers/analysis_controller.dart):
-  - build() → null (idle / no result until run)
-  - analyzeImages(File front, File back) — sets AsyncLoading, compresses images natively, posts base64 to /api/v1/scan/dual-image via ApiClient
-  - analyzeUrl(String url) — sets AsyncLoading, posts to /api/v1/scan/link
-
-Live result: Real result mapped from Dio client via `apiClientProvider`. Wait time is around 20-30s. Errors are caught as AsyncError to be bubbled up to UI.
-
-User flow:
-  1) Home triggers notifier (fire-and-forget), then context.push('/loading').
-  2) Loading uses ref.listen; when state is AsyncData with non-null result → context.go('/verdict').
-  3) Verdict reads ref.watch(analysisControllerProvider) and displays result.
+  - analyzeImages(XFile front, XFile back) — compresses natively mapping Base64.
+  - Returns result mapped dynamically into `translatedResultProvider` (translates live via translation_service 'hi', 'mr', 'en').
 
 DATA MODELS (Freezed)
 ---------------------
-lib/models/product_analysis_result.dart
-
-FlagItem:
-  - code (String)
-  - title (String)
-  - severity (String)
-  - evidence (String)
-  - rationale (String)
-
-HealthierAlternative:
-  - name (String)
-  - rationale (String)
-  - link (String?)
-
-ProductAnalysisResult (Snake-Cased Keys via @JsonKey):
-  - scanId (String?)
-  - productName (String?)
-  - trustScore (double?)
-  - trustLevel (String: RED / YELLOW / GREEN)
-  - overallVerdict (String)
-  - flags (List<FlagItem>)
-  - fssaiNumber (String?)
-  - legalDraftAvailable (bool)
-  - legalDraftText (String?)
-  - healthierAlternatives (List<HealthierAlternative>?)
-
-Freezed classes are declared as `abstract class` (Freezed 3 expectation).
+ProductAnalysisResult (Snake-Cased API Binding):
+  - scanId, productName, trustScore, trustLevel, overallVerdict, flags (List<FlagItem>)
+  - fssaiNumber, legalDraftAvailable, legalDraftText, healthierAlternatives (List<String>)
+  - allergyRisks, upfScore (double)
+  - isNonEdible (bool default false)
 
 DESIGN LANGUAGE (UI/UX)
 -------------------------
-Goal: Modern premium startup UI — not default blocky Material.
-
 - Dark mode default; OLED-style background #0A0A0A
 - Surfaces/cards ~#1A1A1A, border #333333
 - Accents: Neon Green #00FF66, Electric Red #FF3366, Warning Yellow #FFCC00
 - Body text: grey-300 feel (#D1D5DB)
-- Rounded corners 16–24px; bento-style grid on home
-- Glassmorphism on verdict flag cards: BackdropFilter blur + translucent fill
-- Home: large “Scan package” card with bounce scale animation on tap; Cart-Cop pill
-  TextField with stronger neon border/glow when focused
-- Verdict: top ~30% hero — features a custom hardware-accelerated Animated Speedometer projecting the trustScore;
-  bottom gradient FAB-style “Draft FSSAI Complaint” when legalDraftAvailable
-- Displays Healthier Alternatives gracefully if yielded by backend analysis.
-- Legal content: near full-screen modal bottom sheet; serif (Merriweather); Copy button
-
-Theme tokens live in lib/theme/theme.dart as OpenLabelTheme.dark.
-
-PLATFORM NOTES
---------------
-Android (android/app/src/main/AndroidManifest.xml):
-  CAMERA, READ_MEDIA_IMAGES, READ_EXTERNAL_STORAGE (maxSdkVersion 32)
-
-iOS (ios/Runner/Info.plist):
-  NSCameraUsageDescription, NSPhotoLibraryUsageDescription
-
-Scan uses ImageSource.camera twice (front then back). Simulators without camera
-may need a device or a dev change to ImageSource.gallery.
+- Responsive: Handled by `Center > ConstrainedBox(maxWidth: 600/800)`
+- Verdict top ~30% hero features an Animated Speedometer.
+- Non-Edible items trigger a graceful UI intercept bypassing normal gauges showing an "Invalid Target" card.
+- Text-To-Speech bindings feature strict manual play controls mapped dynamically to locale (`hi-IN`, etc.).
 
 KEY FILE MAP
 ------------
 lib/main.dart                          — ProviderScope, MaterialApp.router, theme
-lib/theme/theme.dart                   — OpenLabelTheme.dark, Inter via google_fonts
-lib/router/app_router.dart             — goRouterProvider, three routes
-lib/api/api_client.dart                — Dio API client connected to Render with Supabase auth JWTs
-lib/utils/image_compression_service.dart — Base64 string encoding and compression logic
+lib/theme/theme.dart                   — OpenLabelTheme.dark
+lib/api/api_client.dart                — Dio API client
+lib/utils/image_compression_service.dart — XFile Base64 encoding bridging Mobile/Web
 lib/providers/analysis_controller.dart — AsyncNotifier + Live API logic
-lib/models/product_analysis_result.dart — Freezed models (+ generated parts)
-lib/screens/home_screen.dart           — Bento, scan + Cart-Cop
-lib/screens/loading_screen.dart        — Spinner + ref.listen → verdict
-lib/screens/verdict_screen.dart        — Hero, glass flags, legal sheet
-
-TESTS
------
-test/widget_test.dart — basic pump of OpenLabelApp, finds “OpenLabel” title.
+lib/models/product_analysis_result.dart — Freezed models
+lib/screens/home_screen.dart           — Bento UI
+lib/screens/verdict_screen.dart        — Core Results UI (TTS button, Non-Edible Interceptor)
+lib/services/tts_service.dart          — Global TTS engine without auto-play tracking state
 
 COMMANDS
 --------
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build -d
 flutter analyze
-flutter test
-flutter run
-
-FUTURE HOOKS (NOT IMPLEMENTED)
-------------------------------
-- Wait state optimization or progressive feedback since the backend request can take up to 4-5 mins locally on free tier.
-- Complete ML pipeline integration inside the backend for URL “Cart-Cop”.
-- Local caching of API results via hive or flutter_secure_storage.
+flutter run -d chrome
 
 ================================================================================
 END OF CONTEXT

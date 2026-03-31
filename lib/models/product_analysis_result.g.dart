@@ -43,6 +43,7 @@ _ProductAnalysisResult _$ProductAnalysisResultFromJson(
       ?.map((e) => e as String)
       .toList(),
   upfScore: (json['upf_score'] as num?)?.toDouble(),
+  isNonEdible: json['is_non_edible'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$ProductAnalysisResultToJson(
@@ -60,4 +61,5 @@ Map<String, dynamic> _$ProductAnalysisResultToJson(
   'healthier_alternatives': instance.healthierAlternatives,
   'allergy_risks': instance.allergyRisks,
   'upf_score': instance.upfScore,
+  'is_non_edible': instance.isNonEdible,
 };

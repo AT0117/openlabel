@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,6 +37,7 @@ final translatedResultProvider = FutureProvider<ProductAnalysisResult?>((ref) as
   }
 
   final tOverall = await t(result.overallVerdict);
+  final tProduct = result.productName != null ? await t(result.productName!) : null;
   final tLegal = result.legalDraftText != null ? await t(result.legalDraftText!) : null;
   
   final tFlags = await Future.wait(result.flags.map((f) async {
@@ -54,6 +55,7 @@ final translatedResultProvider = FutureProvider<ProductAnalysisResult?>((ref) as
       : null;
 
   return result.copyWith(
+    productName: tProduct,
     overallVerdict: tOverall,
     legalDraftText: tLegal,
     flags: tFlags,
@@ -100,7 +102,7 @@ class AnalysisController extends AsyncNotifier<ProductAnalysisResult?> {
     return null;
   }
 
-  Future<void> analyzeImages(File front, File back) async {
+  Future<void> analyzeImages(XFile front, XFile back) async {
     state = const AsyncLoading();
     try {
       final userLocation = await _getUserRegion();

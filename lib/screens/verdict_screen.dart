@@ -12,6 +12,7 @@ import 'package:openlabel/theme/theme.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:openlabel/i18n/translation_service.dart';
 import 'package:openlabel/providers/language_provider.dart';
+import 'package:openlabel/services/tts_service.dart';
 
 class VerdictScreen extends ConsumerStatefulWidget {
   const VerdictScreen({super.key});
@@ -37,41 +38,28 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen>
   @override
   void dispose() {
     _pulseController.dispose();
+    ref.read(ttsServiceProvider).stop(ref);
     super.dispose();
   }
 
   Future<void> _onSharePressed(ProductAnalysisResult result) async {
     HapticFeedback.lightImpact();
 
-    final productName = 'this product';
-    final trust = result.trustLevel.toUpperCase();
-    final shareText =
-        '🚨 OpenLabel just caught $productName hiding sugars and faking organic claims! Always check your labels. #TechJustice #OpenLabel';
+    final productName = (result.productName != null && result.productName!.isNotEmpty) 
+        ? result.productName! 
+        : 'this product';
+    final trustLevel = result.trustLevel;
+    final overallVerdict = result.overallVerdict;
 
-    // Bonus: share a snapshot of the trust/hero section.
-    try {
-      final bytes = await _heroScreenshotController.capture(pixelRatio: 2.2);
-      if (bytes != null && bytes.isNotEmpty) {
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [
-              XFile.fromData(bytes, name: 'openlabel_verdict_$trust.png'),
-            ],
-            text: shareText,
-            subject: 'OpenLabel verdict',
-          ),
-        );
-        return;
-      }
-    } catch (_) {
-      // Fallback to text-only sharing below.
-    }
+    final shareText = '''🚨 OpenLabel Alert! 🚨
 
-    await SharePlus.instance.share(
-      ShareParams(
-        text: shareText,
-      ),
-    );
+I just scanned $productName and it scored a $trustLevel Trust Level.
+
+Verdict: $overallVerdict
+
+Stop falling for food fraud. Scan your labels with OpenLabel. #TechJustice #OpenLabel''';
+
+    await Share.share(shareText, subject: 'OpenLabel Verdict for $productName');
   }
 
   void _showLegalSheet(String text) {
@@ -242,6 +230,33 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen>
       );
     }
 
+    if (result.isNonEdible == true) {
+      return Scaffold(
+        backgroundColor: OpenLabelTheme.background,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Stack(
+                children: [
+                  Center(child: _InvalidTargetCard(result: result)),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => context.go('/home'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     Color resolvedColor;
@@ -255,7 +270,10 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen>
 
     return Scaffold(
       backgroundColor: OpenLabelTheme.background,
-      body: Stack(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Stack(
         children: [
           Positioned.fill(
             child: Column(
@@ -337,7 +355,7 @@ class _VerdictScreenState extends ConsumerState<VerdictScreen>
           ),
         ],
       ),
-    );
+    )));
   }
 }
 
@@ -619,14 +637,16 @@ class _TechJusticeButton extends StatelessWidget {
   }
 }
 
-class _VerdictHeadlineCard extends StatelessWidget {
+class _VerdictHeadlineCard extends ConsumerWidget {
   const _VerdictHeadlineCard({required this.result, required this.themeColor});
 
   final ProductAnalysisResult result;
   final Color themeColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPlaying = ref.watch(ttsPlayingProvider);
+
     return Container(
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.all(20),
@@ -642,13 +662,92 @@ class _VerdictHeadlineCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Text(
-        result.overallVerdict,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              height: 1.4,
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 56),
+            child: Text(
+              result.overallVerdict,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    height: 1.4,
+                  ),
             ),
+          ),
+          Positioned(
+            top: -8,
+            right: -8,
+            child: IconButton(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                if (isPlaying) {
+                  ref.read(ttsServiceProvider).stop(ref);
+                } else {
+                  ref.read(ttsServiceProvider).speakVerdict(result.overallVerdict, ref);
+                }
+              },
+              icon: Icon(
+                isPlaying ? Icons.stop_rounded : Icons.volume_up_rounded,
+                color: isPlaying ? OpenLabelTheme.warningYellow : themeColor,
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: isPlaying 
+                    ? OpenLabelTheme.warningYellow.withValues(alpha: 0.15)
+                    : themeColor.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InvalidTargetCard extends StatelessWidget {
+  final ProductAnalysisResult result;
+  
+  const _InvalidTargetCard({required this.result});
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: OpenLabelTheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: OpenLabelTheme.bodyGrey.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: OpenLabelTheme.electricRed.withValues(alpha: 0.05),
+            blurRadius: 30,
+            spreadRadius: 5,
+          )
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: OpenLabelTheme.electricRed.withValues(alpha: 0.15),
+            ),
+            child: const Icon(Icons.do_not_disturb_alt_rounded, size: 64, color: OpenLabelTheme.electricRed),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Not a Food Product', 
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            result.overallVerdict, 
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: OpenLabelTheme.bodyGrey, height: 1.5), 
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

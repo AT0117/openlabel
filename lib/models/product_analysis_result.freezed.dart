@@ -290,7 +290,7 @@ as String,
 /// @nodoc
 mixin _$ProductAnalysisResult {
 
-@JsonKey(name: 'scan_id') String? get scanId;@JsonKey(name: 'product_name') String? get productName;@JsonKey(name: 'trust_score') double? get trustScore;@JsonKey(name: 'trust_level') String get trustLevel;@JsonKey(name: 'overall_verdict') String get overallVerdict; List<FlagItem> get flags;@JsonKey(name: 'fssai_number') String? get fssaiNumber;@JsonKey(name: 'legal_draft_available') bool get legalDraftAvailable;@JsonKey(name: 'legal_draft_text') String? get legalDraftText;@JsonKey(name: 'healthier_alternatives') List<String>? get healthierAlternatives;@JsonKey(name: 'allergy_risks') List<String>? get allergyRisks;@JsonKey(name: 'upf_score') double? get upfScore;
+@JsonKey(name: 'scan_id') String? get scanId;@JsonKey(name: 'product_name') String? get productName;@JsonKey(name: 'trust_score') double? get trustScore;@JsonKey(name: 'trust_level') String get trustLevel;@JsonKey(name: 'overall_verdict') String get overallVerdict; List<FlagItem> get flags;@JsonKey(name: 'fssai_number') String? get fssaiNumber;@JsonKey(name: 'legal_draft_available') bool get legalDraftAvailable;@JsonKey(name: 'legal_draft_text') String? get legalDraftText;@JsonKey(name: 'healthier_alternatives') List<String>? get healthierAlternatives;@JsonKey(name: 'allergy_risks') List<String>? get allergyRisks;@JsonKey(name: 'upf_score') double? get upfScore;@JsonKey(name: 'is_non_edible') bool get isNonEdible;
 /// Create a copy of ProductAnalysisResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -303,16 +303,16 @@ $ProductAnalysisResultCopyWith<ProductAnalysisResult> get copyWith => _$ProductA
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductAnalysisResult&&(identical(other.scanId, scanId) || other.scanId == scanId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.trustScore, trustScore) || other.trustScore == trustScore)&&(identical(other.trustLevel, trustLevel) || other.trustLevel == trustLevel)&&(identical(other.overallVerdict, overallVerdict) || other.overallVerdict == overallVerdict)&&const DeepCollectionEquality().equals(other.flags, flags)&&(identical(other.fssaiNumber, fssaiNumber) || other.fssaiNumber == fssaiNumber)&&(identical(other.legalDraftAvailable, legalDraftAvailable) || other.legalDraftAvailable == legalDraftAvailable)&&(identical(other.legalDraftText, legalDraftText) || other.legalDraftText == legalDraftText)&&const DeepCollectionEquality().equals(other.healthierAlternatives, healthierAlternatives)&&const DeepCollectionEquality().equals(other.allergyRisks, allergyRisks)&&(identical(other.upfScore, upfScore) || other.upfScore == upfScore));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductAnalysisResult&&(identical(other.scanId, scanId) || other.scanId == scanId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.trustScore, trustScore) || other.trustScore == trustScore)&&(identical(other.trustLevel, trustLevel) || other.trustLevel == trustLevel)&&(identical(other.overallVerdict, overallVerdict) || other.overallVerdict == overallVerdict)&&const DeepCollectionEquality().equals(other.flags, flags)&&(identical(other.fssaiNumber, fssaiNumber) || other.fssaiNumber == fssaiNumber)&&(identical(other.legalDraftAvailable, legalDraftAvailable) || other.legalDraftAvailable == legalDraftAvailable)&&(identical(other.legalDraftText, legalDraftText) || other.legalDraftText == legalDraftText)&&const DeepCollectionEquality().equals(other.healthierAlternatives, healthierAlternatives)&&const DeepCollectionEquality().equals(other.allergyRisks, allergyRisks)&&(identical(other.upfScore, upfScore) || other.upfScore == upfScore)&&(identical(other.isNonEdible, isNonEdible) || other.isNonEdible == isNonEdible));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,scanId,productName,trustScore,trustLevel,overallVerdict,const DeepCollectionEquality().hash(flags),fssaiNumber,legalDraftAvailable,legalDraftText,const DeepCollectionEquality().hash(healthierAlternatives),const DeepCollectionEquality().hash(allergyRisks),upfScore);
+int get hashCode => Object.hash(runtimeType,scanId,productName,trustScore,trustLevel,overallVerdict,const DeepCollectionEquality().hash(flags),fssaiNumber,legalDraftAvailable,legalDraftText,const DeepCollectionEquality().hash(healthierAlternatives),const DeepCollectionEquality().hash(allergyRisks),upfScore,isNonEdible);
 
 @override
 String toString() {
-  return 'ProductAnalysisResult(scanId: $scanId, productName: $productName, trustScore: $trustScore, trustLevel: $trustLevel, overallVerdict: $overallVerdict, flags: $flags, fssaiNumber: $fssaiNumber, legalDraftAvailable: $legalDraftAvailable, legalDraftText: $legalDraftText, healthierAlternatives: $healthierAlternatives, allergyRisks: $allergyRisks, upfScore: $upfScore)';
+  return 'ProductAnalysisResult(scanId: $scanId, productName: $productName, trustScore: $trustScore, trustLevel: $trustLevel, overallVerdict: $overallVerdict, flags: $flags, fssaiNumber: $fssaiNumber, legalDraftAvailable: $legalDraftAvailable, legalDraftText: $legalDraftText, healthierAlternatives: $healthierAlternatives, allergyRisks: $allergyRisks, upfScore: $upfScore, isNonEdible: $isNonEdible)';
 }
 
 
@@ -323,7 +323,7 @@ abstract mixin class $ProductAnalysisResultCopyWith<$Res>  {
   factory $ProductAnalysisResultCopyWith(ProductAnalysisResult value, $Res Function(ProductAnalysisResult) _then) = _$ProductAnalysisResultCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'scan_id') String? scanId,@JsonKey(name: 'product_name') String? productName,@JsonKey(name: 'trust_score') double? trustScore,@JsonKey(name: 'trust_level') String trustLevel,@JsonKey(name: 'overall_verdict') String overallVerdict, List<FlagItem> flags,@JsonKey(name: 'fssai_number') String? fssaiNumber,@JsonKey(name: 'legal_draft_available') bool legalDraftAvailable,@JsonKey(name: 'legal_draft_text') String? legalDraftText,@JsonKey(name: 'healthier_alternatives') List<String>? healthierAlternatives,@JsonKey(name: 'allergy_risks') List<String>? allergyRisks,@JsonKey(name: 'upf_score') double? upfScore
+@JsonKey(name: 'scan_id') String? scanId,@JsonKey(name: 'product_name') String? productName,@JsonKey(name: 'trust_score') double? trustScore,@JsonKey(name: 'trust_level') String trustLevel,@JsonKey(name: 'overall_verdict') String overallVerdict, List<FlagItem> flags,@JsonKey(name: 'fssai_number') String? fssaiNumber,@JsonKey(name: 'legal_draft_available') bool legalDraftAvailable,@JsonKey(name: 'legal_draft_text') String? legalDraftText,@JsonKey(name: 'healthier_alternatives') List<String>? healthierAlternatives,@JsonKey(name: 'allergy_risks') List<String>? allergyRisks,@JsonKey(name: 'upf_score') double? upfScore,@JsonKey(name: 'is_non_edible') bool isNonEdible
 });
 
 
@@ -340,7 +340,7 @@ class _$ProductAnalysisResultCopyWithImpl<$Res>
 
 /// Create a copy of ProductAnalysisResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? scanId = freezed,Object? productName = freezed,Object? trustScore = freezed,Object? trustLevel = null,Object? overallVerdict = null,Object? flags = null,Object? fssaiNumber = freezed,Object? legalDraftAvailable = null,Object? legalDraftText = freezed,Object? healthierAlternatives = freezed,Object? allergyRisks = freezed,Object? upfScore = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? scanId = freezed,Object? productName = freezed,Object? trustScore = freezed,Object? trustLevel = null,Object? overallVerdict = null,Object? flags = null,Object? fssaiNumber = freezed,Object? legalDraftAvailable = null,Object? legalDraftText = freezed,Object? healthierAlternatives = freezed,Object? allergyRisks = freezed,Object? upfScore = freezed,Object? isNonEdible = null,}) {
   return _then(_self.copyWith(
 scanId: freezed == scanId ? _self.scanId : scanId // ignore: cast_nullable_to_non_nullable
 as String?,productName: freezed == productName ? _self.productName : productName // ignore: cast_nullable_to_non_nullable
@@ -354,7 +354,8 @@ as bool,legalDraftText: freezed == legalDraftText ? _self.legalDraftText : legal
 as String?,healthierAlternatives: freezed == healthierAlternatives ? _self.healthierAlternatives : healthierAlternatives // ignore: cast_nullable_to_non_nullable
 as List<String>?,allergyRisks: freezed == allergyRisks ? _self.allergyRisks : allergyRisks // ignore: cast_nullable_to_non_nullable
 as List<String>?,upfScore: freezed == upfScore ? _self.upfScore : upfScore // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,isNonEdible: null == isNonEdible ? _self.isNonEdible : isNonEdible // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -439,10 +440,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'scan_id')  String? scanId, @JsonKey(name: 'product_name')  String? productName, @JsonKey(name: 'trust_score')  double? trustScore, @JsonKey(name: 'trust_level')  String trustLevel, @JsonKey(name: 'overall_verdict')  String overallVerdict,  List<FlagItem> flags, @JsonKey(name: 'fssai_number')  String? fssaiNumber, @JsonKey(name: 'legal_draft_available')  bool legalDraftAvailable, @JsonKey(name: 'legal_draft_text')  String? legalDraftText, @JsonKey(name: 'healthier_alternatives')  List<String>? healthierAlternatives, @JsonKey(name: 'allergy_risks')  List<String>? allergyRisks, @JsonKey(name: 'upf_score')  double? upfScore)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'scan_id')  String? scanId, @JsonKey(name: 'product_name')  String? productName, @JsonKey(name: 'trust_score')  double? trustScore, @JsonKey(name: 'trust_level')  String trustLevel, @JsonKey(name: 'overall_verdict')  String overallVerdict,  List<FlagItem> flags, @JsonKey(name: 'fssai_number')  String? fssaiNumber, @JsonKey(name: 'legal_draft_available')  bool legalDraftAvailable, @JsonKey(name: 'legal_draft_text')  String? legalDraftText, @JsonKey(name: 'healthier_alternatives')  List<String>? healthierAlternatives, @JsonKey(name: 'allergy_risks')  List<String>? allergyRisks, @JsonKey(name: 'upf_score')  double? upfScore, @JsonKey(name: 'is_non_edible')  bool isNonEdible)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductAnalysisResult() when $default != null:
-return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel,_that.overallVerdict,_that.flags,_that.fssaiNumber,_that.legalDraftAvailable,_that.legalDraftText,_that.healthierAlternatives,_that.allergyRisks,_that.upfScore);case _:
+return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel,_that.overallVerdict,_that.flags,_that.fssaiNumber,_that.legalDraftAvailable,_that.legalDraftText,_that.healthierAlternatives,_that.allergyRisks,_that.upfScore,_that.isNonEdible);case _:
   return orElse();
 
 }
@@ -460,10 +461,10 @@ return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'scan_id')  String? scanId, @JsonKey(name: 'product_name')  String? productName, @JsonKey(name: 'trust_score')  double? trustScore, @JsonKey(name: 'trust_level')  String trustLevel, @JsonKey(name: 'overall_verdict')  String overallVerdict,  List<FlagItem> flags, @JsonKey(name: 'fssai_number')  String? fssaiNumber, @JsonKey(name: 'legal_draft_available')  bool legalDraftAvailable, @JsonKey(name: 'legal_draft_text')  String? legalDraftText, @JsonKey(name: 'healthier_alternatives')  List<String>? healthierAlternatives, @JsonKey(name: 'allergy_risks')  List<String>? allergyRisks, @JsonKey(name: 'upf_score')  double? upfScore)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'scan_id')  String? scanId, @JsonKey(name: 'product_name')  String? productName, @JsonKey(name: 'trust_score')  double? trustScore, @JsonKey(name: 'trust_level')  String trustLevel, @JsonKey(name: 'overall_verdict')  String overallVerdict,  List<FlagItem> flags, @JsonKey(name: 'fssai_number')  String? fssaiNumber, @JsonKey(name: 'legal_draft_available')  bool legalDraftAvailable, @JsonKey(name: 'legal_draft_text')  String? legalDraftText, @JsonKey(name: 'healthier_alternatives')  List<String>? healthierAlternatives, @JsonKey(name: 'allergy_risks')  List<String>? allergyRisks, @JsonKey(name: 'upf_score')  double? upfScore, @JsonKey(name: 'is_non_edible')  bool isNonEdible)  $default,) {final _that = this;
 switch (_that) {
 case _ProductAnalysisResult():
-return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel,_that.overallVerdict,_that.flags,_that.fssaiNumber,_that.legalDraftAvailable,_that.legalDraftText,_that.healthierAlternatives,_that.allergyRisks,_that.upfScore);case _:
+return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel,_that.overallVerdict,_that.flags,_that.fssaiNumber,_that.legalDraftAvailable,_that.legalDraftText,_that.healthierAlternatives,_that.allergyRisks,_that.upfScore,_that.isNonEdible);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -480,10 +481,10 @@ return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'scan_id')  String? scanId, @JsonKey(name: 'product_name')  String? productName, @JsonKey(name: 'trust_score')  double? trustScore, @JsonKey(name: 'trust_level')  String trustLevel, @JsonKey(name: 'overall_verdict')  String overallVerdict,  List<FlagItem> flags, @JsonKey(name: 'fssai_number')  String? fssaiNumber, @JsonKey(name: 'legal_draft_available')  bool legalDraftAvailable, @JsonKey(name: 'legal_draft_text')  String? legalDraftText, @JsonKey(name: 'healthier_alternatives')  List<String>? healthierAlternatives, @JsonKey(name: 'allergy_risks')  List<String>? allergyRisks, @JsonKey(name: 'upf_score')  double? upfScore)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'scan_id')  String? scanId, @JsonKey(name: 'product_name')  String? productName, @JsonKey(name: 'trust_score')  double? trustScore, @JsonKey(name: 'trust_level')  String trustLevel, @JsonKey(name: 'overall_verdict')  String overallVerdict,  List<FlagItem> flags, @JsonKey(name: 'fssai_number')  String? fssaiNumber, @JsonKey(name: 'legal_draft_available')  bool legalDraftAvailable, @JsonKey(name: 'legal_draft_text')  String? legalDraftText, @JsonKey(name: 'healthier_alternatives')  List<String>? healthierAlternatives, @JsonKey(name: 'allergy_risks')  List<String>? allergyRisks, @JsonKey(name: 'upf_score')  double? upfScore, @JsonKey(name: 'is_non_edible')  bool isNonEdible)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductAnalysisResult() when $default != null:
-return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel,_that.overallVerdict,_that.flags,_that.fssaiNumber,_that.legalDraftAvailable,_that.legalDraftText,_that.healthierAlternatives,_that.allergyRisks,_that.upfScore);case _:
+return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel,_that.overallVerdict,_that.flags,_that.fssaiNumber,_that.legalDraftAvailable,_that.legalDraftText,_that.healthierAlternatives,_that.allergyRisks,_that.upfScore,_that.isNonEdible);case _:
   return null;
 
 }
@@ -495,7 +496,7 @@ return $default(_that.scanId,_that.productName,_that.trustScore,_that.trustLevel
 @JsonSerializable()
 
 class _ProductAnalysisResult implements ProductAnalysisResult {
-  const _ProductAnalysisResult({@JsonKey(name: 'scan_id') this.scanId, @JsonKey(name: 'product_name') this.productName, @JsonKey(name: 'trust_score') this.trustScore, @JsonKey(name: 'trust_level') required this.trustLevel, @JsonKey(name: 'overall_verdict') required this.overallVerdict, required final  List<FlagItem> flags, @JsonKey(name: 'fssai_number') this.fssaiNumber, @JsonKey(name: 'legal_draft_available') required this.legalDraftAvailable, @JsonKey(name: 'legal_draft_text') this.legalDraftText, @JsonKey(name: 'healthier_alternatives') final  List<String>? healthierAlternatives, @JsonKey(name: 'allergy_risks') final  List<String>? allergyRisks, @JsonKey(name: 'upf_score') this.upfScore}): _flags = flags,_healthierAlternatives = healthierAlternatives,_allergyRisks = allergyRisks;
+  const _ProductAnalysisResult({@JsonKey(name: 'scan_id') this.scanId, @JsonKey(name: 'product_name') this.productName, @JsonKey(name: 'trust_score') this.trustScore, @JsonKey(name: 'trust_level') required this.trustLevel, @JsonKey(name: 'overall_verdict') required this.overallVerdict, required final  List<FlagItem> flags, @JsonKey(name: 'fssai_number') this.fssaiNumber, @JsonKey(name: 'legal_draft_available') required this.legalDraftAvailable, @JsonKey(name: 'legal_draft_text') this.legalDraftText, @JsonKey(name: 'healthier_alternatives') final  List<String>? healthierAlternatives, @JsonKey(name: 'allergy_risks') final  List<String>? allergyRisks, @JsonKey(name: 'upf_score') this.upfScore, @JsonKey(name: 'is_non_edible') this.isNonEdible = false}): _flags = flags,_healthierAlternatives = healthierAlternatives,_allergyRisks = allergyRisks;
   factory _ProductAnalysisResult.fromJson(Map<String, dynamic> json) => _$ProductAnalysisResultFromJson(json);
 
 @override@JsonKey(name: 'scan_id') final  String? scanId;
@@ -532,6 +533,7 @@ class _ProductAnalysisResult implements ProductAnalysisResult {
 }
 
 @override@JsonKey(name: 'upf_score') final  double? upfScore;
+@override@JsonKey(name: 'is_non_edible') final  bool isNonEdible;
 
 /// Create a copy of ProductAnalysisResult
 /// with the given fields replaced by the non-null parameter values.
@@ -546,16 +548,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductAnalysisResult&&(identical(other.scanId, scanId) || other.scanId == scanId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.trustScore, trustScore) || other.trustScore == trustScore)&&(identical(other.trustLevel, trustLevel) || other.trustLevel == trustLevel)&&(identical(other.overallVerdict, overallVerdict) || other.overallVerdict == overallVerdict)&&const DeepCollectionEquality().equals(other._flags, _flags)&&(identical(other.fssaiNumber, fssaiNumber) || other.fssaiNumber == fssaiNumber)&&(identical(other.legalDraftAvailable, legalDraftAvailable) || other.legalDraftAvailable == legalDraftAvailable)&&(identical(other.legalDraftText, legalDraftText) || other.legalDraftText == legalDraftText)&&const DeepCollectionEquality().equals(other._healthierAlternatives, _healthierAlternatives)&&const DeepCollectionEquality().equals(other._allergyRisks, _allergyRisks)&&(identical(other.upfScore, upfScore) || other.upfScore == upfScore));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductAnalysisResult&&(identical(other.scanId, scanId) || other.scanId == scanId)&&(identical(other.productName, productName) || other.productName == productName)&&(identical(other.trustScore, trustScore) || other.trustScore == trustScore)&&(identical(other.trustLevel, trustLevel) || other.trustLevel == trustLevel)&&(identical(other.overallVerdict, overallVerdict) || other.overallVerdict == overallVerdict)&&const DeepCollectionEquality().equals(other._flags, _flags)&&(identical(other.fssaiNumber, fssaiNumber) || other.fssaiNumber == fssaiNumber)&&(identical(other.legalDraftAvailable, legalDraftAvailable) || other.legalDraftAvailable == legalDraftAvailable)&&(identical(other.legalDraftText, legalDraftText) || other.legalDraftText == legalDraftText)&&const DeepCollectionEquality().equals(other._healthierAlternatives, _healthierAlternatives)&&const DeepCollectionEquality().equals(other._allergyRisks, _allergyRisks)&&(identical(other.upfScore, upfScore) || other.upfScore == upfScore)&&(identical(other.isNonEdible, isNonEdible) || other.isNonEdible == isNonEdible));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,scanId,productName,trustScore,trustLevel,overallVerdict,const DeepCollectionEquality().hash(_flags),fssaiNumber,legalDraftAvailable,legalDraftText,const DeepCollectionEquality().hash(_healthierAlternatives),const DeepCollectionEquality().hash(_allergyRisks),upfScore);
+int get hashCode => Object.hash(runtimeType,scanId,productName,trustScore,trustLevel,overallVerdict,const DeepCollectionEquality().hash(_flags),fssaiNumber,legalDraftAvailable,legalDraftText,const DeepCollectionEquality().hash(_healthierAlternatives),const DeepCollectionEquality().hash(_allergyRisks),upfScore,isNonEdible);
 
 @override
 String toString() {
-  return 'ProductAnalysisResult(scanId: $scanId, productName: $productName, trustScore: $trustScore, trustLevel: $trustLevel, overallVerdict: $overallVerdict, flags: $flags, fssaiNumber: $fssaiNumber, legalDraftAvailable: $legalDraftAvailable, legalDraftText: $legalDraftText, healthierAlternatives: $healthierAlternatives, allergyRisks: $allergyRisks, upfScore: $upfScore)';
+  return 'ProductAnalysisResult(scanId: $scanId, productName: $productName, trustScore: $trustScore, trustLevel: $trustLevel, overallVerdict: $overallVerdict, flags: $flags, fssaiNumber: $fssaiNumber, legalDraftAvailable: $legalDraftAvailable, legalDraftText: $legalDraftText, healthierAlternatives: $healthierAlternatives, allergyRisks: $allergyRisks, upfScore: $upfScore, isNonEdible: $isNonEdible)';
 }
 
 
@@ -566,7 +568,7 @@ abstract mixin class _$ProductAnalysisResultCopyWith<$Res> implements $ProductAn
   factory _$ProductAnalysisResultCopyWith(_ProductAnalysisResult value, $Res Function(_ProductAnalysisResult) _then) = __$ProductAnalysisResultCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'scan_id') String? scanId,@JsonKey(name: 'product_name') String? productName,@JsonKey(name: 'trust_score') double? trustScore,@JsonKey(name: 'trust_level') String trustLevel,@JsonKey(name: 'overall_verdict') String overallVerdict, List<FlagItem> flags,@JsonKey(name: 'fssai_number') String? fssaiNumber,@JsonKey(name: 'legal_draft_available') bool legalDraftAvailable,@JsonKey(name: 'legal_draft_text') String? legalDraftText,@JsonKey(name: 'healthier_alternatives') List<String>? healthierAlternatives,@JsonKey(name: 'allergy_risks') List<String>? allergyRisks,@JsonKey(name: 'upf_score') double? upfScore
+@JsonKey(name: 'scan_id') String? scanId,@JsonKey(name: 'product_name') String? productName,@JsonKey(name: 'trust_score') double? trustScore,@JsonKey(name: 'trust_level') String trustLevel,@JsonKey(name: 'overall_verdict') String overallVerdict, List<FlagItem> flags,@JsonKey(name: 'fssai_number') String? fssaiNumber,@JsonKey(name: 'legal_draft_available') bool legalDraftAvailable,@JsonKey(name: 'legal_draft_text') String? legalDraftText,@JsonKey(name: 'healthier_alternatives') List<String>? healthierAlternatives,@JsonKey(name: 'allergy_risks') List<String>? allergyRisks,@JsonKey(name: 'upf_score') double? upfScore,@JsonKey(name: 'is_non_edible') bool isNonEdible
 });
 
 
@@ -583,7 +585,7 @@ class __$ProductAnalysisResultCopyWithImpl<$Res>
 
 /// Create a copy of ProductAnalysisResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? scanId = freezed,Object? productName = freezed,Object? trustScore = freezed,Object? trustLevel = null,Object? overallVerdict = null,Object? flags = null,Object? fssaiNumber = freezed,Object? legalDraftAvailable = null,Object? legalDraftText = freezed,Object? healthierAlternatives = freezed,Object? allergyRisks = freezed,Object? upfScore = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? scanId = freezed,Object? productName = freezed,Object? trustScore = freezed,Object? trustLevel = null,Object? overallVerdict = null,Object? flags = null,Object? fssaiNumber = freezed,Object? legalDraftAvailable = null,Object? legalDraftText = freezed,Object? healthierAlternatives = freezed,Object? allergyRisks = freezed,Object? upfScore = freezed,Object? isNonEdible = null,}) {
   return _then(_ProductAnalysisResult(
 scanId: freezed == scanId ? _self.scanId : scanId // ignore: cast_nullable_to_non_nullable
 as String?,productName: freezed == productName ? _self.productName : productName // ignore: cast_nullable_to_non_nullable
@@ -597,7 +599,8 @@ as bool,legalDraftText: freezed == legalDraftText ? _self.legalDraftText : legal
 as String?,healthierAlternatives: freezed == healthierAlternatives ? _self._healthierAlternatives : healthierAlternatives // ignore: cast_nullable_to_non_nullable
 as List<String>?,allergyRisks: freezed == allergyRisks ? _self._allergyRisks : allergyRisks // ignore: cast_nullable_to_non_nullable
 as List<String>?,upfScore: freezed == upfScore ? _self.upfScore : upfScore // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,isNonEdible: null == isNonEdible ? _self.isNonEdible : isNonEdible // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
