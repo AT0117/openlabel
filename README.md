@@ -1,17 +1,17 @@
-# openlabel
+# OpenLabel
 
-A new Flutter project.
+OpenLabel is an AI-powered platform designed to verify the bold claims made by packaged food products. By cross-referencing front-label marketing with back-label reality, OpenLabel unmasks hidden UPFs, verifies organic certifications, and protects consumers from corporate mislabeling. 
+<br>
+It unmasks hidden sugars, ultra-processed additives (UPFs), and undeclared allergens that quietly sabotage your metabolic health.
+<br><br>
+It uses techonlogies like Flutter, Google Vision API, Gemini 2.5 and Python.
+# Preview 
 
-## Getting Started
+https://github.com/user-attachments/assets/72fca7df-e230-405b-b27f-61f711254d6d
 
-This project is a starting point for a Flutter application.
+# Backend 
 
-A few resources to get you started if this is your first Flutter project:
+<a href = "https://github.com/Devanshh06/OpenLabel">Backend GitHub repo<a>
+<br><br>
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<h1>Inspired by FoodPharmer's TruthIn :)</h1>
